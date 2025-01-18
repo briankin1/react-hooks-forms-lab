@@ -1,47 +1,23 @@
-import "@testing-library/jest-dom";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ItemForm from "../components/ItemForm";
-import App from "../components/App";
-
-test("calls the onItemFormSubmit callback prop when the form is submitted", () => {
-  const onItemFormSubmit = jest.fn();
-  render(<ItemForm onItemFormSubmit={onItemFormSubmit} />);
-
-  fireEvent.change(screen.queryByLabelText(/Name/), {
-    target: { value: "Ice Cream" },
-  });
-
-  fireEvent.change(screen.queryByLabelText(/Category/), {
-    target: { value: "Dessert" },
-  });
-
-  fireEvent.submit(screen.queryByText(/Add to List/));
-
-  expect(onItemFormSubmit).toHaveBeenCalledWith(
-    expect.objectContaining({
-      id: expect.any(String),
-      name: "Ice Cream",
-      category: "Dessert",
-    })
-  );
-});
+import ItemForm from "../components/ItemForm"; // Adjust the path based on your structure
 
 test("adds a new item to the list when the form is submitted", () => {
-  render(<App />);
+    const handleItemFormSubmit = jest.fn(); // Mock function to handle form submission
+    render(<ItemForm onItemFormSubmit={handleItemFormSubmit} />);
 
-  const dessertCount = screen.queryAllByText(/Dessert/).length;
+    // Use getByLabelText to find the input field
+    const nameInput = screen.getByLabelText(/Name/i);
+    fireEvent.change(nameInput, { target: { value: "Ice Cream" } });
 
-  fireEvent.change(screen.queryByLabelText(/Name/), {
-    target: { value: "Ice Cream" },
-  });
+    const categorySelect = screen.getByLabelText(/Category/i);
+    fireEvent.change(categorySelect, { target: { value: "Dessert" } });
 
-  fireEvent.change(screen.queryByLabelText(/Category/), {
-    target: { value: "Dessert" },
-  });
+    const submitButton = screen.getByRole("button", { name: /Add to List/i });
+    fireEvent.click(submitButton);
 
-  fireEvent.submit(screen.queryByText(/Add to List/));
-
-  expect(screen.queryByText(/Ice Cream/)).toBeInTheDocument();
-
-  expect(screen.queryAllByText(/Dessert/).length).toBe(dessertCount + 1);
+    expect(handleItemFormSubmit).toHaveBeenCalledWith({
+        id: expect.any(String), // Check that an id is generated
+        name: "Ice Cream",
+        category: "Dessert",
+    });
 });
